@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>北京公交路网</title>
+  <style>
+    html, body, #container {
+      margin: 0; padding: 0; width: 100%; height: 100%;
+    }
+  </style>
+</head>
+<body>
+<div id="container" class="container"></div>
+<script src="http://webapi.amap.com/maps?v=1.4.15&key=你申请的key"></script>
+<script src="http://webapi.amap.com/loca?v=1.3.0&key=你申请的key"></script>
+<script src="js/jquery.min.js"></script>
+<script>
+
+  var map = new AMap.Map('container', {
+    mapStyle: 'amap://styles/644e497a1175a2273764e37dac775820',
+    features: ['bg','road'],
+    center: [116.397732, 39.912152],
+    zoom: 11.2,
+    pitch: 46,
+  });
+
+  var layer = new Loca.LineLayer({
+    map: map,
+  });
+
+  $.get('https://a.amap.com/Loca/static/mock/buslines_bj_zip.txt', function (data) {
+
+    var start = [];
+    var lines = data.split('&').map(function (item) {
+      return {
+        linePath: item.split(';').map(function (lnglat, index) {
+          var ll = lnglat.split(',');
+          ll = [+ll[0], +ll[1]];
+          if (index == 0) {
+            start = ll;
+          } else {
+            ll = [ll[0] / 1000 + start[0], ll[1] / 1000 + start[1]]
+          }
+          return ll;
+        })
+      };
+    });
+    console.log(lines)
+    layer.setData(lines, {
+      lnglat: 'linePath'
+    });
+
+    layer.setOptions({
+      style: {
+        opacity: 0.4,
+        color: '#07E8E4',
+      }
+    });
+
+    layer.render();
+  })
+
+</script>
+</body>
+</html>
